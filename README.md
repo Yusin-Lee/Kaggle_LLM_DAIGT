@@ -10,15 +10,31 @@
       - https://www.kaggle.com/datasets/alejopaullier/daigt-external-dataset : FeedBack Prize 3 competition에서 사용된 2421개의 에세이, 그리고 이에 페어링된 2421개의 AI가 생성한 에세이
       - https://www.kaggle.com/datasets/thedrcat/daigt-proper-train-dataset : 캐글 내 다양한 데이터 셋을 결합하여 44155개의 에세이를 구성. 이 중 29,792개는 사람이 쓴 에세이 14,414개는 AI가 생성한 에세이
       - 3개의 데이터 셋을 결합한 후, 데이터 셋 내 중복을 제거
-   -  사람이 쓴 에세이와 AI가 생성한 에세이는 글의 길이 측면에서 평균 및 분포가 크게 차이 : AI가 생성한 에세이는 모두 4000자 이하
+   - https://www.kaggle.com/datasets/thedrcat/daigt-v2-train-dataset 데이터 셋이 가장 다양한 데이터를 포함하고 있어 위 3개의 데이터 셋 대신 사용
+   - 사람이 쓴 에세이와 AI가 생성한 에세이는 글의 길이 측면에서 평균 및 분포가 크게 차이 : AI가 생성한 에세이는 모두 4000자 이하
 
-# 2. PLM 기반의 모델링
-   -  베이스 모델은 deberta-v3 모델을 사용
-   -  xsmall, base, large에 따라 text length, batch size 등을 조정
-   -  efficiency tuning을 위해 LoRA 사용 : r = 8, alpha = 16, module = ['query','value']
-   -  cuda의 autocast를 사용하여 MP 적용
-   -  accumulation은 Batch size에 따라 full batch가 32 혹은 64가 되도록 조정
+# 2.1 PLM 기반의 모델링 - deverta-v3
+   - 베이스 모델은 deberta-v3 모델을 사용. xsmall, base, large에 따라 text length, batch size 등을 조정
+   - efficiency tuning을 위해 LoRA 사용 : r = 8, alpha = 16, module = ['query','value']
+   - cuda의 autocast를 사용하여 MP 적용
+   - accumulation은 Batch size에 따라 full batch가 32 혹은 64가 되도록 조정
+
+# 2.2 PLM 기반의 모델링 - bert-base-cased
+   - bert-base-multilingual-cased 사용
+   - T4 2장을 사용
+   - MP 적용
+   - accumulation은 full batch가 32 혹은 64가 되도록 조정
 
 # 3. 후처리 방법
    - 4000자 이상은 모두 사람이 쓴 에세이로 간주 -> 효과 ?
    - submission이 0 혹은 1이 아닌 0~1 사이의 실수로 받기 때문에, sigmoid로 처리
+
+# 4. PLM 기반 결과
+   - 0.84 (23.12.04 기준)
+
+# 5. ML 기반의 모델링
+   - 에세이를 TF-IDF로 vectorize
+   - SGD, LGBM 등의 ML 알고리즘을 앙상블
+
+# 6. ML 기반 결과
+   - 0.955 (23.12.04 기준)
